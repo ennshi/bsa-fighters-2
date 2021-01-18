@@ -10,7 +10,7 @@ export async function fight(firstFighter, secondFighter) {
     document.addEventListener('keydown', (e) => {
       handleKeyDown(e, pressedBtnSet, [firstFighterStats, secondFighterStats]);
     });
-    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet));
+    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet, [firstFighterStats, secondFighterStats]));
   });
 }
 
@@ -45,7 +45,8 @@ function createFighterStats({_id, health, defense, attack}) {
     health,
     defense,
     attack,
-    canDoSuperAttack: true
+    canSuperAttack: true,
+    canAttack: true
   }
 }
 
@@ -56,11 +57,34 @@ function handleKeyDown(e, btnSet, fighters) {
   fightAction(btnSet, fighters);
 }
 
-function handleKeyUp(e, btnSet) {
+function handleKeyUp(e, btnSet, fighters) {
   btnSet.delete(e.code);
+  switch (e.code) {
+    case controls.PlayerOneAttack:
+      return fighters[0].canAttack = true;
+    case controls.PlayerTwoAttack:
+      return fighters[1].canAttack = true;
+  }
   console.log(btnSet);
 }
 
-function fightAction() {
-  console.log('action');
+function fightAction(btnSet, fighters) {
+  const fighterOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && fighters[0].canAttack);
+  const fighterTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && fighters[1].canAttack);
+  switch(true) {
+    case fighterOneAttack:
+      fighters[0].canAttack = false;
+      if(btnSet.has(controls.PlayerTwoBlock)) {
+        return console.log('1 attack 2 block')
+      }
+      return console.log('1 attack');
+    case fighterTwoAttack:
+      fighters[1].canAttack = false;
+      if(btnSet.has(controls.PlayerTwoBlock)) {
+        return console.log('2 attack 1 block')
+      }
+      return console.log('2 attack');
+    default:
+      return;
+  }
 }
