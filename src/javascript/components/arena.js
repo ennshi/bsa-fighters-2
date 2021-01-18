@@ -100,7 +100,7 @@ function createShield(fighter, position) {
 
 function createShieldImage() {
   const attributes = {
-    src: '../../resources/shield.png',
+    src: './resources/shield.png',
     alt: 'shield'
   };
   return createElement({
@@ -134,7 +134,7 @@ function createFist(fighter, position) {
 
 function createFistImage() {
   const attributes = {
-    src: '../../resources/fist.png',
+    src: './resources/fist.png',
     alt: 'fist'
   };
   return createElement({
@@ -168,7 +168,7 @@ function createFireball(fighter, position) {
 
 function createFireballImage() {
   const attributes = {
-    src: '../../resources/fireball.gif',
+    src: './resources/fireball.gif',
     alt: 'fireball'
   };
   return createElement({

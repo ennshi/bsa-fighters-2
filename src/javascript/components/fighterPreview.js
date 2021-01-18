@@ -73,7 +73,7 @@ function createStatIcon(label) {
     tagName: 'img',
     className: 'fighter-details__icon',
     attributes: {
-      src: `../../../resources/icons/${label}.png`,
+      src: `./resources/icons/${label}.png`,
       alt: label
     }
   });
