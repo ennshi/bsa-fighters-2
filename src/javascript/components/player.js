@@ -1,6 +1,7 @@
-function Player({ _id, health, defense, attack }) {
-  this._id = _id;
+function Player(num, {health, defense, attack }) {
+  this.num = num;
   this.health = health;
+  this.initialHealth = health;
   this.defense = defense;
   this.attack = attack;
   this.canAttack = true;
