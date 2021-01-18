@@ -4,8 +4,13 @@ export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
     // resolve the promise with the winner when fight is over
     let winner = null;
+    const pressedBtnSet = new Set();
     const firstFighterStats = createFighterStats(firstFighter);
     const secondFighterStats = createFighterStats(secondFighter);
+    document.addEventListener('keydown', (e) => {
+      handleKeyDown(e, pressedBtnSet, [firstFighterStats, secondFighterStats]);
+    });
+    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet));
   });
 }
 
@@ -42,4 +47,20 @@ function createFighterStats({_id, health, defense, attack}) {
     attack,
     canDoSuperAttack: true
   }
+}
+
+function handleKeyDown(e, btnSet, fighters) {
+  if(btnSet.has(e.code)) return;
+  btnSet.add(e.code);
+  console.log(btnSet);
+  fightAction(btnSet, fighters);
+}
+
+function handleKeyUp(e, btnSet) {
+  btnSet.delete(e.code);
+  console.log(btnSet);
+}
+
+function fightAction() {
+  console.log('action');
 }
