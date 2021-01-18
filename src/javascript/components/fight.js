@@ -1,19 +1,19 @@
 import { controls } from '../../constants/controls';
 import Player from './player';
-import { toggleShield } from './fightersViewUpdates';
+import { changeHealthbarWidth, toggleShield } from './fightersViewUpdates';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
     // resolve the promise with the winner when fight is over
-    let winnerId = '';
+    let winnerNum = '';
     const pressedBtnSet = new Set();
     const players = createPlayers(firstFighter, secondFighter);
     const onKeyDown = (e) => {
         handleKeyDown(e, pressedBtnSet, players);
-        winnerId = checkEndGame(players);
-        if(winnerId) {
-          (winnerId === firstFighter._id) && resolve(firstFighter);
-          (winnerId === secondFighter._id) && resolve(secondFighter);
+        winnerNum = checkEndGame(players);
+        if(winnerNum) {
+          (winnerNum === 1) && resolve(firstFighter);
+          (winnerNum === 2) && resolve(secondFighter);
           document.removeEventListener('keydown', onKeyDown);
           document.removeEventListener('keyup', onKeyUp);
         }
@@ -51,8 +51,8 @@ function getSuperAttackPower(fighter) {
 
 function createPlayers(firstFighter, secondFighter) {
   return {
-    'playerOne': new Player(firstFighter),
-    'playerTwo': new Player(secondFighter)
+    'playerOne': new Player(1, firstFighter),
+    'playerTwo': new Player(2, secondFighter)
   };
 }
 
@@ -92,19 +92,9 @@ function fightAction(btnSet, {playerOne, playerTwo}) {
       playerOne.decreaseHealth(getSuperAttackPower(playerTwo));
       return delaySuperAttack(playerTwo);
     case doAttack(btnSet, controls.PlayerOneAttack, controls.PlayerOneBlock, playerOne.canAttack):
-      playerOne.canAttack = false;
-      if(btnSet.has(controls.PlayerTwoBlock)) {
-        playerTwo.decreaseHealth(getDamage(playerOne, playerTwo));
-        return console.log('1 attack 2 block')
-      }
-      return playerTwo.decreaseHealth(getHitPower(playerOne));
+      return effectAttack(playerOne, playerTwo, btnSet, controls.PlayerTwoBlock);
     case doAttack(btnSet, controls.PlayerTwoAttack, controls.PlayerTwoBlock, playerTwo.canAttack):
-      playerTwo.canAttack = false;
-      if(btnSet.has(controls.PlayerOneBlock)) {
-        playerOne.decreaseHealth(getDamage(playerTwo, playerOne));
-        return console.log('2 attack 1 block')
-      }
-      return playerOne.decreaseHealth(getHitPower(playerTwo));
+      return effectAttack(playerTwo, playerOne, btnSet, controls.PlayerOneBlock);
     default:
       return;
   }
@@ -112,6 +102,14 @@ function fightAction(btnSet, {playerOne, playerTwo}) {
 
 function doAttack(btnSet, controlAttack, controlBlock, canAttack) {
   return (btnSet.has(controlAttack) && !btnSet.has(controlBlock) && canAttack);
+}
+
+function effectAttack(attacker, defender, btnSet, controlDefenderBlock) {
+  attacker.canAttack = false;
+  const damage = btnSet.has(controlDefenderBlock) ? getDamage(attacker, defender) : getHitPower(attacker);
+  defender.decreaseHealth(damage);
+  const position = (defender.num === 1) ? 'left' : 'right';
+  changeHealthbarWidth(defender, position);
 }
 
 function doSuperAttack(btnSet, controlAttack, controlBlock, canSuperAttack) {
@@ -147,9 +145,9 @@ function delaySuperAttack(player) {
 function checkEndGame({playerOne, playerTwo}) {
   switch (true) {
     case (playerOne.health === 0):
-      return playerTwo._id;
+      return 2;
     case (playerTwo.health === 0):
-      return playerOne._id;
+      return 1;
     default:
       return '';
   }
