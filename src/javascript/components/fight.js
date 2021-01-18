@@ -74,25 +74,21 @@ function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
 }
 
 function fightAction(btnSet, {playerOne, playerTwo}) {
-  const playerOneSuperAttack = (checkSuperAttack(btnSet, controls.PlayerOneCriticalHitCombination) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canSuperAttack);
-  const playerTwoSuperAttack = (checkSuperAttack(btnSet, controls.PlayerTwoCriticalHitCombination) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canSuperAttack);
-  const playerOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canAttack);
-  const playerTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canAttack);
   switch(true) {
-    case playerOneSuperAttack:
+    case doSuperAttack(btnSet, controls.PlayerOneCriticalHitCombination, controls.PlayerOneBlock, playerOne.canSuperAttack):
       playerTwo.decreaseHealth(getSuperAttackPower(playerOne));
       return delaySuperAttack(playerOne);
-    case playerTwoSuperAttack:
+    case doSuperAttack(btnSet, controls.PlayerTwoCriticalHitCombination, controls.PlayerTwoBlock, playerTwo.canSuperAttack):
       playerOne.decreaseHealth(getSuperAttackPower(playerTwo));
       return delaySuperAttack(playerTwo);
-    case playerOneAttack:
+    case doAttack(btnSet, controls.PlayerOneAttack, controls.PlayerOneBlock, playerOne.canAttack):
       playerOne.canAttack = false;
       if(btnSet.has(controls.PlayerTwoBlock)) {
         playerTwo.decreaseHealth(getDamage(playerOne, playerTwo));
         return console.log('1 attack 2 block')
       }
       return playerTwo.decreaseHealth(getHitPower(playerOne));
-    case playerTwoAttack:
+    case doAttack(btnSet, controls.PlayerTwoAttack, controls.PlayerTwoBlock, playerTwo.canAttack):
       playerTwo.canAttack = false;
       if(btnSet.has(controls.PlayerOneBlock)) {
         playerOne.decreaseHealth(getDamage(playerTwo, playerOne));
@@ -102,6 +98,14 @@ function fightAction(btnSet, {playerOne, playerTwo}) {
     default:
       return;
   }
+}
+
+function doAttack(btnSet, controlAttack, controlBlock, canAttack) {
+  return (btnSet.has(controlAttack) && !btnSet.has(controlBlock) && canAttack);
+}
+
+function doSuperAttack(btnSet, controlAttack, controlBlock, canSuperAttack) {
+  return (checkSuperAttack(btnSet, controlAttack) && !btnSet.has(controlBlock) && canSuperAttack);
 }
 
 function checkSuperAttack(btnSet, control) {
