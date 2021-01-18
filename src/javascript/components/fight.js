@@ -1,5 +1,6 @@
 import { controls } from '../../constants/controls';
 import Player from './player';
+import { toggleShield } from './fightersViewUpdates';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
@@ -58,7 +59,12 @@ function createPlayers(firstFighter, secondFighter) {
 function handleKeyDown(e, btnSet, {playerOne, playerTwo}) {
   if(btnSet.has(e.code)) return;
   btnSet.add(e.code);
-  console.log(btnSet);
+  if(e.code === controls.PlayerOneBlock) {
+    return toggleShield('left');
+  }
+  if(e.code === controls.PlayerTwoBlock) {
+    return toggleShield('right');
+  }
   fightAction(btnSet, {playerOne, playerTwo});
 }
 
@@ -69,6 +75,10 @@ function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
       return playerOne.canAttack = true;
     case controls.PlayerTwoAttack:
       return playerTwo.canAttack = true;
+    case controls.PlayerOneBlock:
+      return toggleShield('left');
+    case controls.PlayerTwoBlock:
+      return toggleShield('right');
   }
   console.log(btnSet);
 }
