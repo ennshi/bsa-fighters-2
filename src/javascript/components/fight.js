@@ -4,13 +4,22 @@ import Player from './player';
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
     // resolve the promise with the winner when fight is over
-    let winner = null;
+    let winnerId = '';
     const pressedBtnSet = new Set();
     const players = createPlayers(firstFighter, secondFighter);
-    document.addEventListener('keydown', (e) => {
-      handleKeyDown(e, pressedBtnSet, players);
-    });
-    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet, players));
+    const onKeyDown = (e) => {
+        handleKeyDown(e, pressedBtnSet, players);
+        winnerId = checkEndGame(players);
+        if(winnerId) {
+          (winnerId === firstFighter._id) && resolve(firstFighter);
+          (winnerId === secondFighter._id) && resolve(secondFighter);
+          document.removeEventListener('keydown', onKeyDown);
+          document.removeEventListener('keyup', onKeyUp);
+        }
+    };
+    const onKeyUp = (e) => handleKeyUp(e, pressedBtnSet, players);
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keyup', onKeyUp);
   });
 }
 
@@ -84,5 +93,16 @@ function fightAction(btnSet, {playerOne, playerTwo}) {
       return playerOne.decreaseHealth(getHitPower(playerTwo));
     default:
       return;
+  }
+}
+
+function checkEndGame({playerOne, playerTwo}) {
+  switch (true) {
+    case (playerOne.health === 0):
+      return playerTwo._id;
+    case (playerTwo.health === 0):
+      return playerOne._id;
+    default:
+      return '';
   }
 }
