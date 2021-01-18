@@ -5,12 +5,11 @@ export async function fight(firstFighter, secondFighter) {
     // resolve the promise with the winner when fight is over
     let winner = null;
     const pressedBtnSet = new Set();
-    const firstFighterStats = createFighterStats(firstFighter);
-    const secondFighterStats = createFighterStats(secondFighter);
+    const players = createPlayers(firstFighter, secondFighter);
     document.addEventListener('keydown', (e) => {
-      handleKeyDown(e, pressedBtnSet, [firstFighterStats, secondFighterStats]);
+      handleKeyDown(e, pressedBtnSet, players);
     });
-    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet, [firstFighterStats, secondFighterStats]));
+    document.addEventListener('keyup', (e) => handleKeyUp(e, pressedBtnSet, players));
   });
 }
 
@@ -39,48 +38,54 @@ function getSuperShotPower(fighter) {
   return fighter.attack * 2;
 }
 
-function createFighterStats({_id, health, defense, attack}) {
+function createPlayers(firstFighter, secondFighter) {
   return {
-    _id,
+    'playerOne': createPlayer(firstFighter),
+    'playerTwo': createPlayer(secondFighter)
+  };
+}
+
+function createPlayer({health, defense, attack}) {
+  return {
     health,
     defense,
     attack,
     canSuperAttack: true,
     canAttack: true
-  }
+  };
 }
 
-function handleKeyDown(e, btnSet, fighters) {
+function handleKeyDown(e, btnSet, {playerOne, playerTwo}) {
   if(btnSet.has(e.code)) return;
   btnSet.add(e.code);
   console.log(btnSet);
-  fightAction(btnSet, fighters);
+  fightAction(btnSet, {playerOne, playerTwo});
 }
 
-function handleKeyUp(e, btnSet, fighters) {
+function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
   btnSet.delete(e.code);
   switch (e.code) {
     case controls.PlayerOneAttack:
-      return fighters[0].canAttack = true;
+      return playerOne.canAttack = true;
     case controls.PlayerTwoAttack:
-      return fighters[1].canAttack = true;
+      return playerTwo.canAttack = true;
   }
   console.log(btnSet);
 }
 
-function fightAction(btnSet, fighters) {
-  const fighterOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && fighters[0].canAttack);
-  const fighterTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && fighters[1].canAttack);
+function fightAction(btnSet, {playerOne, playerTwo}) {
+  const fighterOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canAttack);
+  const fighterTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canAttack);
   switch(true) {
     case fighterOneAttack:
-      fighters[0].canAttack = false;
+      playerOne.canAttack = false;
       if(btnSet.has(controls.PlayerTwoBlock)) {
         return console.log('1 attack 2 block')
       }
       return console.log('1 attack');
     case fighterTwoAttack:
-      fighters[1].canAttack = false;
-      if(btnSet.has(controls.PlayerTwoBlock)) {
+      playerTwo.canAttack = false;
+      if(btnSet.has(controls.PlayerOneBlock)) {
         return console.log('2 attack 1 block')
       }
       return console.log('2 attack');
