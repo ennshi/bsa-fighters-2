@@ -1,6 +1,7 @@
 import { controls } from '../../constants/controls';
 import Player from './player';
 import { changeHealthbarWidth, showAttack, toggleShield, toggleSuperIndicator } from './fightersViewUpdates';
+import { soundOfSuccess } from './audioEffects';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
@@ -12,6 +13,7 @@ export async function fight(firstFighter, secondFighter) {
         handleKeyDown(e, pressedBtnSet, players);
         winnerNum = checkEndGame(players);
         if(winnerNum) {
+          soundOfSuccess();
           (winnerNum === 1) && resolve(firstFighter);
           (winnerNum === 2) && resolve(secondFighter);
           document.removeEventListener('keydown', onKeyDown);
