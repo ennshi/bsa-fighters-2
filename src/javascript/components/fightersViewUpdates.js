@@ -1,6 +1,7 @@
-export function changeHealthbarWidth(initialWidth, initialHealth, currentHealth, position) {
+export function changeHealthbarWidth({initialHealth, health}, position) {
+  const initialWidth = document.getElementById('left-fighter-indicator').offsetWidth;
   const healthbar = document.getElementById(`${position}-fighter-indicator`);
-  const newHealthbar = (initialWidth * currentHealth / initialHealth);
+  const newHealthbar = (initialWidth * health / initialHealth);
   const healthbarWidth = newHealthbar >= 0 ? newHealthbar : 0;
   healthbar.style.width = `${healthbarWidth}px`;
 }
