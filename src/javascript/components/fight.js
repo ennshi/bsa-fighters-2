@@ -44,7 +44,7 @@ export function getBlockPower(fighter) {
   return fighter.defense * dodgeChance;
 }
 
-function getSuperShotPower(fighter) {
+function getSuperAttackPower(fighter) {
   return fighter.attack * 2;
 }
 
@@ -74,9 +74,17 @@ function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
 }
 
 function fightAction(btnSet, {playerOne, playerTwo}) {
+  const playerOneSuperAttack = (checkSuperAttack(btnSet, controls.PlayerOneCriticalHitCombination) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canSuperAttack);
+  const playerTwoSuperAttack = (checkSuperAttack(btnSet, controls.PlayerTwoCriticalHitCombination) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canSuperAttack);
   const playerOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canAttack);
   const playerTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canAttack);
   switch(true) {
+    case playerOneSuperAttack:
+      playerTwo.decreaseHealth(getSuperAttackPower(playerOne));
+      return delaySuperAttack(playerOne);
+    case playerTwoSuperAttack:
+      playerOne.decreaseHealth(getSuperAttackPower(playerTwo));
+      return delaySuperAttack(playerTwo);
     case playerOneAttack:
       playerOne.canAttack = false;
       if(btnSet.has(controls.PlayerTwoBlock)) {
@@ -94,6 +102,32 @@ function fightAction(btnSet, {playerOne, playerTwo}) {
     default:
       return;
   }
+}
+
+function checkSuperAttack(btnSet, control) {
+  if(btnSet.size < control) {
+    return false;
+  }
+  return controlValuesInSet(btnSet, control);
+}
+
+function controlValuesInSet(set, control) {
+  const len = control.length;
+  let result = true;
+  for(let i = 0; i < len; i++) {
+    if(!set.has(control[i])) {
+      result = false;
+      break;
+    }
+  }
+  return result;
+}
+
+function delaySuperAttack(player) {
+  player.canSuperAttack = false;
+  setTimeout(() => {
+    player.canSuperAttack = true;
+  }, 10000);
 }
 
 function checkEndGame({playerOne, playerTwo}) {
