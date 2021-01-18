@@ -19,7 +19,7 @@ export function showAttack(position, attack) {
   }, 300);
 }
 
-export function toggleSuperindicator(canSuperAttack, position) {
+export function toggleSuperIndicator(canSuperAttack, position) {
   const indicator = document.getElementById(`${position}-superindicator`);
   indicator.style.visibility = canSuperAttack ? 'visible' : 'hidden';
 }
