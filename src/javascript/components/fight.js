@@ -1,4 +1,5 @@
 import { controls } from '../../constants/controls';
+import Player from './player';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
@@ -40,18 +41,8 @@ function getSuperShotPower(fighter) {
 
 function createPlayers(firstFighter, secondFighter) {
   return {
-    'playerOne': createPlayer(firstFighter),
-    'playerTwo': createPlayer(secondFighter)
-  };
-}
-
-function createPlayer({health, defense, attack}) {
-  return {
-    health,
-    defense,
-    attack,
-    canSuperAttack: true,
-    canAttack: true
+    'playerOne': new Player(firstFighter),
+    'playerTwo': new Player(secondFighter)
   };
 }
 
@@ -74,21 +65,23 @@ function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
 }
 
 function fightAction(btnSet, {playerOne, playerTwo}) {
-  const fighterOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canAttack);
-  const fighterTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canAttack);
+  const playerOneAttack = (btnSet.has(controls.PlayerOneAttack) && !btnSet.has(controls.PlayerOneBlock) && playerOne.canAttack);
+  const playerTwoAttack = (btnSet.has(controls.PlayerTwoAttack) && !btnSet.has(controls.PlayerTwoBlock) && playerTwo.canAttack);
   switch(true) {
-    case fighterOneAttack:
+    case playerOneAttack:
       playerOne.canAttack = false;
       if(btnSet.has(controls.PlayerTwoBlock)) {
+        playerTwo.decreaseHealth(getDamage(playerOne, playerTwo));
         return console.log('1 attack 2 block')
       }
-      return console.log('1 attack');
-    case fighterTwoAttack:
+      return playerTwo.decreaseHealth(getHitPower(playerOne));
+    case playerTwoAttack:
       playerTwo.canAttack = false;
       if(btnSet.has(controls.PlayerOneBlock)) {
+        playerOne.decreaseHealth(getDamage(playerTwo, playerOne));
         return console.log('2 attack 1 block')
       }
-      return console.log('2 attack');
+      return playerOne.decreaseHealth(getHitPower(playerTwo));
     default:
       return;
   }
