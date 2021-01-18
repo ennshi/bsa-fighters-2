@@ -1,6 +1,6 @@
 import { controls } from '../../constants/controls';
 import Player from './player';
-import { changeHealthbarWidth, toggleShield } from './fightersViewUpdates';
+import { changeHealthbarWidth, showAttack, toggleShield, toggleSuperIndicator } from './fightersViewUpdates';
 
 export async function fight(firstFighter, secondFighter) {
   return new Promise((resolve) => {
@@ -80,17 +80,14 @@ function handleKeyUp(e, btnSet, {playerOne, playerTwo}) {
     case controls.PlayerTwoBlock:
       return toggleShield('right');
   }
-  console.log(btnSet);
 }
 
 function fightAction(btnSet, {playerOne, playerTwo}) {
   switch(true) {
     case doSuperAttack(btnSet, controls.PlayerOneCriticalHitCombination, controls.PlayerOneBlock, playerOne.canSuperAttack):
-      playerTwo.decreaseHealth(getSuperAttackPower(playerOne));
-      return delaySuperAttack(playerOne);
+      return effectSuperAttack(playerOne, playerTwo);
     case doSuperAttack(btnSet, controls.PlayerTwoCriticalHitCombination, controls.PlayerTwoBlock, playerTwo.canSuperAttack):
-      playerOne.decreaseHealth(getSuperAttackPower(playerTwo));
-      return delaySuperAttack(playerTwo);
+      return effectSuperAttack(playerTwo, playerOne);
     case doAttack(btnSet, controls.PlayerOneAttack, controls.PlayerOneBlock, playerOne.canAttack):
       return effectAttack(playerOne, playerTwo, btnSet, controls.PlayerTwoBlock);
     case doAttack(btnSet, controls.PlayerTwoAttack, controls.PlayerTwoBlock, playerTwo.canAttack):
@@ -105,11 +102,13 @@ function doAttack(btnSet, controlAttack, controlBlock, canAttack) {
 }
 
 function effectAttack(attacker, defender, btnSet, controlDefenderBlock) {
+  const positionAttacker = (attacker.num === 1) ? 'left' : 'right';
+  showAttack(positionAttacker, 'fist');
   attacker.canAttack = false;
   const damage = btnSet.has(controlDefenderBlock) ? getDamage(attacker, defender) : getHitPower(attacker);
   defender.decreaseHealth(damage);
-  const position = (defender.num === 1) ? 'left' : 'right';
-  changeHealthbarWidth(defender, position);
+  const positionDefender = (defender.num === 1) ? 'left' : 'right';
+  changeHealthbarWidth(defender, positionDefender);
 }
 
 function doSuperAttack(btnSet, controlAttack, controlBlock, canSuperAttack) {
@@ -135,11 +134,22 @@ function controlValuesInSet(set, control) {
   return result;
 }
 
-function delaySuperAttack(player) {
+function delaySuperAttack(player, position) {
   player.canSuperAttack = false;
+  toggleSuperIndicator(player.canSuperAttack, position);
   setTimeout(() => {
     player.canSuperAttack = true;
+    toggleSuperIndicator(player.canSuperAttack, position);
   }, 10000);
+}
+
+function effectSuperAttack(attacker, defender) {
+  const positionAttacker = (attacker.num === 1) ? 'left' : 'right';
+  const positionDefender = (defender.num === 1) ? 'left' : 'right';
+  showAttack(positionAttacker, 'fireball');
+  defender.decreaseHealth(getSuperAttackPower(attacker));
+  changeHealthbarWidth(defender, positionDefender);
+  delaySuperAttack(attacker, positionAttacker);
 }
 
 function checkEndGame({playerOne, playerTwo}) {
